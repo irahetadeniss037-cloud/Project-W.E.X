@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyecto WALL-E Controlado por Bluetooth</title>
+
+  <style>
+    /* ===== ESTILO GENERAL ===== */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #050505;
+      color: #e0e0e0;
+      text-align: center;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ===== ENCABEZADO FUTURISTA ANIMADO E INTERACTIVO ===== */
+    header {
+      position: relative;
+      padding: 100px 20px;
+      background: radial-gradient(circle at 50% 50%, #00111a, #000);
+      overflow: hidden;
+      animation: slideInRight 1.5s ease-out;
+    }
+
+    /* Capa animada neón rotatoria */
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg,
+        #00f2fe,
+        #4facfe,
+        #00f2fe,
+        #f093fb,
+        #00f2fe
+      );
+      animation: rotateGlow 8s linear infinite;
+      opacity: 0.15;
+      z-index: 0;
+    }
+
+    /* Capa que reacciona al mouse */
+    header::after {
+      content: "";
+      position: absolute;
+      top: var(--y, 50%);
+      left: var(--x, 50%);
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,255,255,0.2), transparent 70%);
+      border-radius: 50%;
+      transition: top 0.1s, left 0.1s;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    header h1 {
+      position: relative;
+      font-size: 3.2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #00f2fe, #4facfe, #f093fb, #00f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px #00f2fe;
+      animation: glowPulse 3s infinite alternate;
+      z-index: 2;
+    }
+
+    header p {
+      position: relative;
+      font-size: 1.2rem;
+      color: #b3f0ff;
+      margin-top: 10px;
+      max-width: 800px;
+      margin: 10px auto;
+      z-index: 2;
+      animation: fadeIn 2.2s ease-in;
+    }
+
+    /* ===== SECCIONES ===== */
+    section {
+      padding: 60px 20px;
+      animation: fadeIn 1.5s ease-in-out;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    section h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #00f2fe;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #00f2fe;
+    }
+
+    section p {
+      font-size: 1.1rem;
+      color: #ccc;
+      text-align: justify;
+      line-height: 1.8;
+    }
+
+    /* ===== GALERÍA ===== */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .gallery-item {
+      background: #111;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .gallery-item img, .gallery-item video {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .gallery-caption {
+      margin-top: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: #00f2fe;
+      text-shadow: 0 0 10px #00f2fe;
+      transition: transform 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px #00f2fe, 0 0 40px #4facfe;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.08);
+      box-shadow: 0 0 25px #00f2fe;
+    }
+
+    .gallery-item:hover .gallery-caption {
+      transform: scale(1.15);
+      text-shadow: 0 0 15px #00f2fe, 0 0 25px #4facfe;
+      color: #00ffcc;
+    }
+
+    /* ===== CARRUSEL ===== */
+    .container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: auto;
+      gap: 16px;
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .container li {
+      position: relative;
+      overflow: hidden;
+      flex: 0 0 100px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: 2px solid #00f2fe;
+      transition: flex 0.4s ease;
+      background: #111;
+      padding: 8px;
+    }
+
+    .container li img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .container li:hover {
+      flex: 0 0 260px;
+    }
+
+    .caption {
+      color: #00f2fe;
+      font-size: 1rem;
+      margin-top: 8px;
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 10px #00f2fe;
+      transition: transform 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .container li:hover img {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #00f2fe, 0 0 30px #4facfe;
+    }
+
+    .container li:hover .caption {
+      transform: scale(1.15);
+      text-shadow: 0 0 15px #00f2fe, 0 0 25px #4facfe;
+      color: #00ffcc;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 20px;
+      background: rgba(0,0,0,0.9);
+      font-size: 0.9rem;
+      color: #999;
+      margin-top: 40px;
+    }
+
+    /* ===== ANIMACIONES ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes glowPulse {
+      from { text-shadow: 0 0 10px #00f2fe, 0 0 20px #4facfe; }
+      to { text-shadow: 0 0 30px #f093fb, 0 0 60px #4facfe; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      header h1 { font-size: 2.3rem; }
+      section { padding: 40px 15px; }
+      .container li:hover { flex: 0 0 200px; }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.8rem; }
+      header p { font-size: 1rem; }
+      .gallery-item img, .gallery-item video { height: 180px; }
+      .container li img { height: 100px; }
+    }
+  </style>
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- ENCABEZADO -->
+  <header id="header">
+    <h1>Proyecto WALL-E Controlado por Bluetooth</h1>
+    <p>Explora el futuro de la robótica con este diseño inspirado en WALL-E:  
+    control inalámbrico, ingeniería creativa y tecnología inteligente.</p>
+  </header>
+
+  <!-- SOBRE WALL-E -->
+  <section id="sobre">
+    <h2>Sobre el Proyecto</h2>
+    <p>
+      Este proyecto busca replicar el encanto de WALL-E mientras enseña los fundamentos de la robótica moderna.  
+      Mediante un módulo Bluetooth HC-05, el robot puede ser controlado de forma inalámbrica desde una aplicación móvil.  
+      Se han integrado motores de tracción, servos de rotación y una estructura diseñada para soportar diferentes terrenos.
+    </p>
+    <p>
+      El cerebro del robot es un microcontrolador Arduino Nano, encargado de coordinar cada movimiento con precisión.  
+      Gracias a su bajo consumo energético y su programación flexible, WALL-E puede realizar giros, avanzar, retroceder  
+      y responder instantáneamente a las órdenes del usuario.  
+    </p>
+  </section>
+
+  <!-- GALERÍA -->
+  <section id="galeria">
+    <h2>Construcción de WALL-E</h2>
+    <div class="gallery">
+      <div class="gallery-item">
+        <img src="img/walle.finalizadojpg.webp" alt="WALL-E finalizado">
+        <div class="gallery-caption">Diseño final completamente ensamblado, con sistema Bluetooth operativo.</div>
+      </div>
+      <div class="gallery-item">
+        <img src="img/walle.exejpg.jpg" alt="Prototipo inicial">
+        <div class="gallery-caption">Prototipo inicial del robot durante su fase de diseño estructural.</div>
+      </div>
+      <div class="gallery-item">
+        <img src="img/walle.5jpg.jpg" alt="Avance del chasis">
+        <div class="gallery-caption">Estructura base con motores y sistema de dirección montado.</div>
+      </div>
+      <div class="gallery-item">
+        <video controls>
+          <source src="img/video.walle6mp4.mp4" type="video/mp4">
+          Tu navegador no soporta videos.
+        </video>
+        <div class="gallery-caption">Prueba de movimiento y respuesta al control Bluetooth.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARRUSEL -->
+  <section id="carrusel">
+    <h2>Detalles del Circuito</h2>
+    <ul class="container">
+      <li>
+        <img src="img/boceto.wallejpg.jpg" alt="Boceto de diseño">
+        <div class="caption">Boceto original de diseño funcional.</div>
+      </li>
+      <li>
+        <img src="img/robot2jpg.jpg" alt="Circuito de prueba">
+        <div class="caption">Pruebas iniciales del circuito principal.</div>
+      </li>
+      <li>
+        <img src="img/circuito.finaljpg.jpg" alt="Circuito final">
+        <div class="caption">Circuito final completamente ensamblado.</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- MEJORAS FUTURAS -->
+  <section id="mejoras">
+    <h2>Futuras Mejoras</h2>
+    <p>
+      Las siguientes versiones incluirán sensores ultrasónicos para evitar obstáculos, un sistema de voz interactivo,  
+      cámaras con transmisión en tiempo real y reconocimiento de comandos desde aplicaciones móviles.  
+      Estas innovaciones convertirán a WALL-E en un robot más autónomo, funcional y educativo.
+    </p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 - Proyecto WALL-E Controlado por Bluetooth</p>
+  </footer>
+
+  <script>
+    /* ==== EFECTO DE MOVIMIENTO INTERACTIVO DEL FONDO ==== */
+    const header = document.getElementById("header");
+    header.addEventListener("mousemove", e => {
+      const rect = header.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      header.style.setProperty("--x", `${x}%`);
+      header.style.setProperty("--y", `${y}%`);
+    });
+  </script>
+</body>
+</html>
